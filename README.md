@@ -1,1 +1,1 @@
-Galaxy is a new beat executer but is not detected is took months so pls dowload it to support us me and the other owners are giving the first 5 people the premeum virsion so have fun changing the game so enjoy
+GALAXY is a newly developed Roblox executor for Windows computers. GALAXY is still in beta, so if you find a glitch, please contact support in the Discord server! https://discord.gg/Y9MwCnbeQk
