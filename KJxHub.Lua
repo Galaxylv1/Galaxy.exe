@@ -34,7 +34,7 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-local MainTab = Window:CreateTab("🔫🔫 Silent Aimbot", nil) -- Title, Image
+local MainTab = Window:CreateTab("🔫🔫 | Aimbot", nil) -- Title, Image
 local MainSection = MainTab:CreateSection("Main")
 
 Rayfield:Notify({
@@ -53,79 +53,45 @@ Rayfield:Notify({
 })
 
 local Button = MainTab:CreateButton({
-   Name = "Silent Aimbot",
+   Name = "Aimbot",
    Callback = function()      
      -- Place this script in a LocalScript in StarterPlayerScripts
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local StarterGui = game:GetService("StarterGui")
 local camera = workspace.CurrentCamera
 
 local localPlayer = Players.LocalPlayer
 local isRightMouseButtonDown = false -- Tracks right mouse button state
-local fov = 90 -- Field of view radius
-local scriptEnabled = true -- Tracks if the script is enabled
 
--- Create a FOV circle using the Drawing API
-local fovCircle = Drawing.new("Circle")
-fovCircle.Color = Color3.new(1, 0, 0) -- Red color
-fovCircle.Thickness = 2
-fovCircle.Radius = fov
-fovCircle.Visible = true
-fovCircle.Transparency = 1
-
--- Show a notification when the script is executed
-StarterGui:SetCore("SendNotification", {
-    Title = "Script Executed",
-    Text = "Head lock-on enabled! Hold right mouse button to lock on within FOV.",
-    Duration = 5
-})
-
--- Update the FOV circle position
-local function updateFOVCircle()
-    if scriptEnabled then
-        local mouseLocation = UserInputService:GetMouseLocation()
-        fovCircle.Position = Vector2.new(mouseLocation.X, mouseLocation.Y)
-    end
-end
-
--- Function to find the closest player's head within the FOV circle
-local function findClosestPlayerHeadInFOV()
-    local closestPlayer = nil
+-- Function to find the closest player's head
+local function findClosestPlayerHead()
+    local closestHead = nil
     local closestDistance = math.huge
 
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= localPlayer and player.Character and player.Character:FindFirstChild("Head") then
             local head = player.Character.Head
-            local headScreenPosition, onScreen = camera:WorldToViewportPoint(head.Position)
+            local headPosition = head.Position
+            local distance = (headPosition - camera.CFrame.Position).Magnitude
 
-            if onScreen then
-                local mouseLocation = UserInputService:GetMouseLocation()
-                local distanceToMouse = (Vector2.new(headScreenPosition.X, headScreenPosition.Y) - mouseLocation).Magnitude
-
-                if distanceToMouse < fov and distanceToMouse < closestDistance then
-                    closestPlayer = head
-                    closestDistance = distanceToMouse
-                end
+            if distance < closestDistance then
+                closestHead = head
+                closestDistance = distance
             end
         end
     end
 
-    return closestPlayer
+    return closestHead
 end
 
--- Function to lock the camera onto a player's head and center the lock
+-- Function to lock the camera onto a player's head
 local function lockOnToHead()
-    if isRightMouseButtonDown and scriptEnabled then
-        local targetHead = findClosestPlayerHeadInFOV()
+    if isRightMouseButtonDown then
+        local targetHead = findClosestPlayerHead()
         if targetHead then
-            local headScreenPosition = camera:WorldToViewportPoint(targetHead.Position)
-            local centerScreen = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
-            if (Vector2.new(headScreenPosition.X, headScreenPosition.Y) - centerScreen).Magnitude <= fov then
-                camera.CFrame = CFrame.new(camera.CFrame.Position, targetHead.Position)
-            end
+            camera.CFrame = CFrame.new(camera.CFrame.Position, targetHead.Position)
         end
     end
 end
@@ -144,13 +110,7 @@ UserInputService.InputEnded:Connect(function(input, gameProcessedEvent)
     end
 end)
 
--- Continuously update the FOV circle and lock-on while the right mouse button is held
+-- Continuously lock-on while the right mouse button is held
 RunService.RenderStepped:Connect(function()
-    if scriptEnabled then
-        updateFOVCircle()
-        lockOnToHead()
-    end
+    lockOnToHead()
 end)
-     
-   end,
-})
