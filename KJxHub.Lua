@@ -52,9 +52,11 @@ Rayfield:Notify({
 },
 })
 
-local Button = MainTab:CreateButton({
+local Toggle = Tab:CreateToggle({
    Name = "Aimbot",
-   Callback = function()      
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
    -- Place this script in a LocalScript in StarterPlayerScripts
 
 local Players = game:GetService("Players")
@@ -64,21 +66,26 @@ local camera = workspace.CurrentCamera
 
 local localPlayer = Players.LocalPlayer
 local isRightMouseButtonDown = false -- Tracks right mouse button state
+local fov = 90 -- Field of view radius
 
--- Function to find the closest player's head
-local function findClosestPlayerHead()
+-- Function to find the closest player's head within the FOV circle
+local function findClosestPlayerHeadInFOV()
     local closestHead = nil
     local closestDistance = math.huge
 
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= localPlayer and player.Character and player.Character:FindFirstChild("Head") then
             local head = player.Character.Head
-            local headPosition = head.Position
-            local distance = (headPosition - camera.CFrame.Position).Magnitude
+            local headScreenPosition, onScreen = camera:WorldToViewportPoint(head.Position)
 
-            if distance < closestDistance then
-                closestHead = head
-                closestDistance = distance
+            if onScreen then
+                local centerScreen = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+                local distanceToCenter = (Vector2.new(headScreenPosition.X, headScreenPosition.Y) - centerScreen).Magnitude
+
+                if distanceToCenter < fov and distanceToCenter < closestDistance then
+                    closestHead = head
+                    closestDistance = distanceToCenter
+                end
             end
         end
     end
@@ -89,7 +96,7 @@ end
 -- Function to lock the camera onto a player's head
 local function lockOnToHead()
     if isRightMouseButtonDown then
-        local targetHead = findClosestPlayerHead()
+        local targetHead = findClosestPlayerHeadInFOV()
         if targetHead then
             camera.CFrame = CFrame.new(camera.CFrame.Position, targetHead.Position)
         end
@@ -114,5 +121,6 @@ end)
 RunService.RenderStepped:Connect(function()
     lockOnToHead()
 end)
-end,
+
+   end,
 })
