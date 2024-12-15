@@ -55,7 +55,7 @@ Rayfield:Notify({
 local Button = MainTab:CreateButton({
    Name = "Aimbot",
    Callback = function()      
-     -- Place this script in a LocalScript in StarterPlayerScripts
+   -- Place this script in a LocalScript in StarterPlayerScripts
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -114,4 +114,5 @@ end)
 RunService.RenderStepped:Connect(function()
     lockOnToHead()
 end)
-]}
+
+})
