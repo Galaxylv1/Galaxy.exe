@@ -114,5 +114,5 @@ end)
 RunService.RenderStepped:Connect(function()
     lockOnToHead()
 end)
-
+end,
 })
